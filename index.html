@@ -1,0 +1,247 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISEA — Astronomy Community</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#070d1c;--panel:#101c34;--blue:#448cff;--cyan:#45d9ff;--text:#edf4ff;--muted:#9aacc8}
+html{scroll-behavior:smooth}
+body{font-family:Arial,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button,input,textarea{font:inherit}
+#stars{position:fixed;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(1px 1px at 20% 30%,white 99%,transparent),radial-gradient(2px 2px at 70% 60%,#8acbff 99%,transparent),radial-gradient(1px 1px at 40% 80%,white 99%,transparent),radial-gradient(2px 2px at 90% 15%,white 99%,transparent);background-size:180px 180px;opacity:.6}
+.container{width:min(1100px,92%);margin:auto}
+header{padding:20px 0;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.logo{font-weight:900;font-size:22px;color:#66baff;letter-spacing:2px}
+nav{display:flex;gap:18px;flex-wrap:wrap}
+nav a{font-size:13px;color:#c3d5ef}
+nav a:hover{color:var(--cyan)}
+.hero{text-align:center;padding:85px 15px 65px;background:radial-gradient(ellipse at center,#183a70 0%,transparent 70%)}
+.tag{color:var(--cyan);font-size:12px;letter-spacing:3px;font-weight:bold}
+.hero h1{font-size:clamp(36px,7vw,66px);margin:20px 0;line-height:1.1}
+.hero h1 span{color:#61aaff}
+.hero p{color:#b8c8df;max-width:600px;margin:0 auto 28px;line-height:1.8}
+.btn{border:0;border-radius:9px;padding:13px 20px;font-weight:bold;display:inline-block;transition:.2s;cursor:pointer}
+.btn:hover{transform:translateY(-3px);filter:brightness(1.15)}
+.primary{background:linear-gradient(100deg,#2677ed,#38c5f5);color:white}
+.secondary{background:#182b49;color:white;border:1px solid #31527e}
+.buttons{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:35px auto 65px}
+.stat,.card,.panel{background:rgba(17,30,54,.9);border:1px solid #243d61;border-radius:14px;padding:22px}
+.stat{text-align:center}
+.stat strong{display:block;font-size:28px;color:#62b8ff;margin-bottom:7px}
+.stat small{color:var(--muted);font-size:11px;letter-spacing:1px}
+section{padding:45px 0}
+.section-title{text-align:center;margin-bottom:30px}
+.section-title small{color:var(--cyan);letter-spacing:3px}
+.section-title h2{font-size:30px;margin-top:10px}
+.features,.education{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.card{transition:.25s}
+.card:hover{transform:translateY(-5px);border-color:#4b9bff}
+.card .emoji{font-size:30px;margin-bottom:15px}
+.card h3{margin-bottom:10px;font-size:17px}
+.card p,.edu-item p{color:var(--muted);font-size:13px;line-height:1.7}
+.about{display:grid;grid-template-columns:1fr 1fr;gap:25px;align-items:center}
+.about p{color:var(--muted);line-height:1.9;margin:15px 0}
+footer{text-align:center;padding:30px 15px;color:#8094b4;border-top:1px solid #1d304c;font-size:12px}
+.form-panel{max-width:650px;margin:auto}
+.progress{height:7px;background:#243550;border-radius:20px;overflow:hidden;margin:20px 0}
+.progress div{height:100%;background:linear-gradient(90deg,#3985ff,#45d9ff);width:12.5%;transition:.3s}
+.step{display:none}
+.step.active{display:block}
+.step h3{font-size:23px;margin:18px 0}
+.step label{display:block;color:#b7c9e4;font-size:12px;margin:15px 0 8px}
+.step input,.step textarea,.search-input{width:100%;padding:13px;background:#091426;border:1px solid #304968;border-radius:8px;color:white;outline:none}
+.step input:focus,.step textarea:focus{border-color:#48aaff}
+.step textarea{min-height:100px;resize:vertical}
+.step-buttons{display:flex;justify-content:space-between;gap:10px;margin-top:25px}
+.skill-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.skill{padding:13px;background:#0a172b;border:1px solid #304968;border-radius:8px;cursor:pointer}
+.skill.selected{border-color:#43c7ff;background:#153254}
+#preview{max-width:100%;margin-top:15px;border-radius:10px}
+.member-card{background:linear-gradient(145deg,#132c55,#071323);border:1px solid #55aaff;border-radius:16px;padding:25px;text-align:center;margin-top:20px}
+.member-card h3{color:#69c7ff;letter-spacing:2px}
+.member-card img{width:85px;height:85px;border-radius:50%;object-fit:cover;margin:15px auto}
+.member-card p{margin:8px;color:#c4d8f3}
+.hidden{display:none!important}
+.edu-item{padding:17px;background:#111e34;border:1px solid #263e60;border-radius:12px}
+.edu-item h3{font-size:15px;margin-bottom:8px}
+.search-wrap{max-width:550px;margin:0 auto 20px;display:flex;gap:8px}
+@media(max-width:700px){header{align-items:flex-start;flex-direction:column}nav{gap:12px}.stats{grid-template-columns:repeat(2,1fr)}.features,.education{grid-template-columns:repeat(2,1fr)}.about{grid-template-columns:1fr}}
+@media(max-width:430px){.features,.education{grid-template-columns:1fr}.hero{padding-top:60px}.skill-list{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div id="stars"></div>
+<header class="container">
+<div class="logo">✦ ISEA</div>
+<nav>
+<a href="#home">HOME</a>
+<a href="#features">FEATURES</a>
+<a href="#selection">SELECTION</a>
+<a href="#education">EDUCATION</a>
+<a href="#about">ABOUT</a>
+</nav>
+</header>
+
+<main>
+<section class="hero" id="home">
+<div class="tag">INTERNATIONAL SPACE & ASTRONOMY COMMUNITY</div>
+<h1>Explore The <span>Universe</span></h1>
+<p>Welcome to ISEA — International Space & Astronomy Community. Tempat berkumpulnya para pecinta astronomi untuk belajar, berbagi pengetahuan, dan menjelajahi misteri alam semesta.</p>
+<div class="buttons">
+<a href="#selection" class="btn primary">🚀 DAFTAR SEKARANG</a>
+<a href="#education" class="btn secondary">🔭 EXPLORE EDUCATION</a>
+</div>
+</section>
+
+<div class="container">
+<div class="stats">
+<div class="stat"><strong>ISEA</strong><small>OUR COMMUNITY</small></div>
+<div class="stat"><strong>∞</strong><small>UNIVERSE</small></div>
+<div class="stat"><strong>8</strong><small>SELECTION STEPS</small></div>
+<div class="stat"><strong>24/7</strong><small>LEARN ASTRONOMY</small></div>
+</div>
+
+<section id="features">
+<div class="section-title"><small>OUR FEATURES</small><h2>Fitur Unggulan</h2></div>
+<div class="features">
+<div class="card"><div class="emoji">📋</div><h3>ISEA Selection</h3><p>Formulir pendaftaran anggota dengan delapan tahapan dan kartu anggota digital.</p></div>
+<div class="card"><div class="emoji">🌌</div><h3>Space Exploration</h3><p>Jelajahi berbagai objek astronomi dan fenomena alam semesta.</p></div>
+<div class="card"><div class="emoji">🪐</div><h3>Planetary Knowledge</h3><p>Pelajari planet, satelit, asteroid, dan berbagai objek tata surya.</p></div>
+<div class="card"><div class="emoji">🔭</div><h3>Astronomy Education</h3><p>Tempat belajar astronomi dari dasar hingga pembahasan lebih lanjut.</p></div>
+<div class="card"><div class="emoji">🚀</div><h3>Space Technology</h3><p>Mengenal teknologi roket, satelit, teleskop, dan eksplorasi antariksa.</p></div>
+<div class="card"><div class="emoji">👥</div><h3>Community</h3><p>Bertemu dengan orang-orang yang memiliki ketertarikan terhadap astronomi.</p></div>
+</div>
+</section>
+
+<section id="selection">
+<div class="section-title"><small>MEMBER REGISTRATION</small><h2>ISEA Selection Form</h2><p style="color:var(--muted);margin-top:10px">Lengkapi delapan tahap pendaftaran berikut.</p></div>
+<div class="panel form-panel">
+<div style="display:flex;justify-content:space-between;color:#a9c5e9;font-size:12px"><span id="stepText">LANGKAH 1 DARI 8</span><span id="percent">12.5%</span></div>
+<div class="progress"><div id="progressBar"></div></div>
+<form id="ascForm">
+<div class="step active"><h3>Siapa namamu? 👋</h3><label>NAMA LENGKAP</label><input id="name" required placeholder="Masukkan nama lengkap"></div>
+<div class="step"><h3>Username TikTok kamu 🎵</h3><label>USERNAME TIKTOK</label><input id="username" required placeholder="@username"></div>
+<div class="step"><h3>Berapa umurmu? 🎂</h3><label>UMUR</label><input id="age" type="number" min="10" max="99" required placeholder="Contoh: 16"></div>
+<div class="step"><h3>Kamu dari mana? 📍</h3><label>KOTA / ASAL DAERAH</label><input id="city" required placeholder="Contoh: Pemalang"></div>
+<div class="step"><h3>Kenapa mau gabung ISEA? 🌌</h3><label>ALASAN BERGABUNG</label><textarea id="reason" minlength="20" required placeholder="Ceritakan alasanmu..."></textarea></div>
+<div class="step"><h3>Skill apa yang kamu miliki? 🔧</h3><p style="color:var(--muted);font-size:12px;margin-bottom:15px">Pilih minimal satu kemampuan.</p><div class="skill-list">
+<div class="skill" data-skill="Editor">✂️ Editor</div><div class="skill" data-skill="Astronomy">🔭 Astronomy</div><div class="skill" data-skill="Programmer">💻 Programmer</div><div class="skill" data-skill="Designer">🎨 Designer</div><div class="skill" data-skill="Content Creator">📱 Content Creator</div><div class="skill" data-skill="Researcher">📊 Researcher</div>
+</div></div>
+<div class="step"><h3>Upload foto profil 📸</h3><label>FOTO PROFIL (OPSIONAL)</label><input type="file" id="photo" accept="image/png,image/jpeg,image/webp"><p style="font-size:12px;color:var(--muted);margin-top:10px">JPG / PNG / WEBP • Maksimal 5 MB.</p><img id="preview" class="hidden"></div>
+<div class="step"><h3>Review pendaftaran ✅</h3><div id="review" style="line-height:2;color:#c5d7ef;font-size:13px"></div></div>
+<div class="step-buttons"><button type="button" class="btn secondary" id="back" onclick="move(-1)">← KEMBALI</button><button type="button" class="btn primary" id="next" onclick="move(1)">LANJUT →</button><button type="submit" class="btn primary hidden" id="submit">✓ SUBMIT PENDAFTARAN</button></div>
+</form>
+<div id="result" class="hidden">
+<div class="member-card" id="memberCard"><h3>✦ ISEA OFFICIAL MEMBER ✦</h3><img id="cardPhoto" class="hidden"><h2 id="cardName">Member ISEA</h2><p id="cardUsername">@username</p><p id="cardCity">Indonesia</p><p id="cardSkills"></p><p id="cardId" style="color:#61c6ff;font-size:12px"></p><p style="color:#6bdfb3">✓ REGISTERED BY ISEA SYSTEM</p></div>
+<div class="buttons" style="margin-top:20px"><button class="btn primary" onclick="downloadCard()">⬇ DOWNLOAD CARD</button><a class="btn secondary" target="_blank" rel="noopener" href="https://chat.whatsapp.com/JPaAfhVfWeIABQx3eSAJzo?s=cl&p=a&iam=2">💬 JOIN COMMUNITY</a><button class="btn secondary" onclick="location.reload()">DAFTAR LAGI</button></div>
+</div>
+</div>
+</section>
+
+<section id="education">
+<div class="section-title"><small>KNOWLEDGE CENTER</small><h2>Education Hub</h2><p style="color:var(--muted);margin-top:10px">Pelajari keindahan dan misteri alam semesta.</p></div>
+<div class="search-wrap"><input class="search-input" id="search" placeholder="🔍 Cari materi astronomi..."><button class="btn primary" onclick="searchEdu()">CARI</button></div>
+<div class="education" id="eduList">
+<div class="edu-item"><h3>☀️ Matahari</h3><p>Bintang pusat tata surya yang menghasilkan energi melalui fusi nuklir.</p></div>
+<div class="edu-item"><h3>🌍 Bumi</h3><p>Planet ketiga dari Matahari dan satu-satunya tempat yang diketahui mendukung kehidupan.</p></div>
+<div class="edu-item"><h3>🔴 Mars</h3><p>Planet merah yang menjadi salah satu target utama eksplorasi robotik.</p></div>
+<div class="edu-item"><h3>🪐 Saturnus</h3><p>Planet raksasa gas yang terkenal dengan sistem cincinnya.</p></div>
+<div class="edu-item"><h3>🌌 Galaksi Bima Sakti</h3><p>Galaksi tempat tata surya kita berada.</p></div>
+<div class="edu-item"><h3>🕳️ Black Hole</h3><p>Wilayah ruang-waktu dengan gravitasi sangat kuat sehingga cahaya pun tidak dapat lolos dari dalam horizon peristiwanya.</p></div>
+<div class="edu-item"><h3>✨ Nebula</h3><p>Awan gas dan debu antarbintang yang menjadi tempat berbagai proses pembentukan bintang.</p></div>
+<div class="edu-item"><h3>☄️ Komet</h3><p>Benda langit yang tersusun dari es, debu, dan material lainnya.</p></div>
+<div class="edu-item"><h3>🚀 Eksplorasi Antariksa</h3><p>Perjalanan manusia dan wahana robotik untuk mempelajari ruang angkasa.</p></div>
+</div>
+</section>
+
+<section id="about">
+<div class="section-title"><small>ABOUT US</small><h2>Tentang ISEA</h2></div>
+<div class="panel about">
+<div><h2>🌌 International Space & Astronomy Community</h2><p>ISEA merupakan komunitas online yang berfokus pada astronomi dan eksplorasi luar angkasa. Kami hadir sebagai tempat berbagi pengetahuan, berdiskusi, dan memperkenalkan keindahan alam semesta.</p><p>Karena alam semesta selalu memiliki sesuatu yang belum kita ketahui.</p><a class="btn primary" target="_blank" rel="noopener" href="https://chat.whatsapp.com/JPaAfhVfWeIABQx3eSAJzo?s=cl&p=a&iam=2">🚀 JOIN ISEA</a></div>
+<div style="text-align:center;font-size:100px">🌌</div>
+</div>
+</section>
+</div>
+</main>
+
+<footer><p>© 2026 ISEA — INTERNATIONAL SPACE & ASTRONOMY COMMUNITY</p><p style="margin-top:8px">Explore the Universe • Discover the Unknown</p></footer>
+
+<script>
+const steps=[...document.querySelectorAll('.step')];
+let current=0,skills=[],photoData="";
+function showStep(){
+steps.forEach((s,i)=>s.classList.toggle('active',i===current));
+document.getElementById('stepText').textContent=`LANGKAH ${current+1} DARI 8`;
+document.getElementById('percent').textContent=`${(current+1)*12.5}%`;
+document.getElementById('progressBar').style.width=`${(current+1)*12.5}%`;
+document.getElementById('back').classList.toggle('hidden',current===0);
+document.getElementById('next').classList.toggle('hidden',current===7);
+document.getElementById('submit').classList.toggle('hidden',current!==7);
+}
+function validateStep(){
+for(const field of steps[current].querySelectorAll('input[required],textarea[required]'))if(!field.reportValidity())return false;
+if(current===5&&!skills.length){alert('Pilih minimal satu skill terlebih dahulu.');return false}
+return true;
+}
+function move(d){
+if(d>0&&!validateStep())return;
+if(d>0&&current===6)makeReview();
+current=Math.max(0,Math.min(7,current+d));showStep();
+}
+document.querySelectorAll('.skill').forEach(el=>el.addEventListener('click',()=>{
+el.classList.toggle('selected');
+const v=el.dataset.skill;
+skills=el.classList.contains('selected')?[...skills,v]:skills.filter(s=>s!==v);
+}));
+document.getElementById('photo').addEventListener('change',e=>{
+const file=e.target.files[0];if(!file)return;
+if(file.size>5*1024*1024){alert('Ukuran foto maksimal 5 MB.');e.target.value='';return}
+const reader=new FileReader();
+reader.onload=()=>{photoData=reader.result;const img=document.getElementById('preview');img.src=photoData;img.classList.remove('hidden')};
+reader.readAsDataURL(file);
+});
+function escapeHTML(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function makeReview(){
+const g=id=>document.getElementById(id).value;
+document.getElementById('review').innerHTML=`<b>Nama:</b> ${escapeHTML(g('name'))}<br><b>Username:</b> ${escapeHTML(g('username'))}<br><b>Umur:</b> ${escapeHTML(g('age'))}<br><b>Asal:</b> ${escapeHTML(g('city'))}<br><b>Alasan:</b> ${escapeHTML(g('reason'))}<br><b>Skill:</b> ${skills.map(escapeHTML).join(', ')}<br><b>Foto:</b> ${photoData?'Sudah diunggah':'Tidak ada'}`;
+}
+document.getElementById('ascForm').addEventListener('submit',e=>{
+e.preventDefault();if(!validateStep())return;
+const g=id=>document.getElementById(id).value;
+const id='ISEA-'+Math.random().toString(36).slice(2,9).toUpperCase();
+document.getElementById('cardName').textContent=g('name');
+document.getElementById('cardUsername').textContent=g('username');
+document.getElementById('cardCity').textContent=g('city');
+document.getElementById('cardSkills').textContent=skills.join(' • ');
+document.getElementById('cardId').textContent='MEMBER ID: '+id;
+const img=document.getElementById('cardPhoto');
+if(photoData){img.src=photoData;img.classList.remove('hidden')}else img.classList.add('hidden');
+document.getElementById('ascForm').classList.add('hidden');
+document.getElementById('result').classList.remove('hidden');
+});
+function downloadCard(){
+const c=document.createElement('canvas'),ctx=c.getContext('2d');c.width=900;c.height=550;
+const g=ctx.createLinearGradient(0,0,900,550);g.addColorStop(0,'#173e75');g.addColorStop(1,'#071323');ctx.fillStyle=g;ctx.fillRect(0,0,900,550);
+ctx.strokeStyle='#61baff';ctx.lineWidth=5;ctx.strokeRect(15,15,870,520);ctx.textAlign='center';
+ctx.fillStyle='#70c9ff';ctx.font='bold 36px Arial';ctx.fillText('✦ ISEA OFFICIAL MEMBER ✦',450,85);
+ctx.fillStyle='white';ctx.font='bold 42px Arial';ctx.fillText(document.getElementById('cardName').textContent,450,235);
+ctx.font='25px Arial';ctx.fillStyle='#c4d8f3';ctx.fillText(document.getElementById('cardUsername').textContent,450,285);ctx.fillText(document.getElementById('cardCity').textContent,450,330);
+ctx.font='20px Arial';ctx.fillText(document.getElementById('cardSkills').textContent,450,380);
+ctx.fillStyle='#70c9ff';ctx.fillText(document.getElementById('cardId').textContent,450,440);
+ctx.fillStyle='#6bdfb3';ctx.font='bold 20px Arial';ctx.fillText('REGISTERED BY ISEA SYSTEM',450,490);
+const a=document.createElement('a');a.download='ISEA-Member-Card.png';a.href=c.toDataURL('image/png');a.click();
+}
+function searchEdu(){
+const q=document.getElementById('search').value.toLowerCase();
+document.querySelectorAll('.edu-item').forEach(x=>x.style.display=x.textContent.toLowerCase().includes(q)?'':'none');
+}
+document.getElementById('search').addEventListener('input',searchEdu);
+showStep();
+</script>
+</body>
+</html>
