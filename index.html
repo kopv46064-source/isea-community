@@ -6,6 +6,142 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ISEA — Astronomy Community</title>
 <style>
+/* ===== ISEA INTERACTIVE EXPERIENCE ===== */
+
+.card, .edu-item, .stat, .panel {
+    backdrop-filter: blur(12px);
+}
+
+section {
+    scroll-margin-top: 25px;
+}
+
+.edu-item {
+    position: relative;
+    overflow: hidden;
+    transition: .3s ease;
+}
+
+.edu-item:hover {
+    transform: translateY(-7px);
+    border-color: #45d9ff;
+    box-shadow: 0 10px 35px #1675ff20;
+}
+
+.edu-item button {
+    margin-top: 15px;
+    padding: 9px 15px;
+    border: 1px solid #3689d9;
+    border-radius: 7px;
+    background: #15345a;
+    color: white;
+    cursor: pointer;
+}
+
+.edu-item button:hover {
+    background: #2677ed;
+}
+
+.lesson-content {
+    display: none;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #345071;
+    color: #c5d7ef;
+    font-size: 13px;
+    line-height: 1.9;
+}
+
+.lesson-content.open {
+    display: block;
+    animation: appear .4s ease;
+}
+
+.daily-box {
+    padding: 25px;
+    margin-bottom: 25px;
+    border: 1px solid #398cff;
+    border-radius: 15px;
+    background:
+    radial-gradient(circle at top right,#245b9a55,transparent 60%),
+    #101e37;
+}
+
+.daily-box h3 {
+    color: #60caff;
+    margin: 12px 0;
+}
+
+.category-list {
+    display: flex;
+    gap: 9px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 25px;
+}
+
+.category-list button {
+    background: #132744;
+    color: #c5d7ef;
+    border: 1px solid #304968;
+    border-radius: 20px;
+    padding: 9px 15px;
+    cursor: pointer;
+}
+
+.category-list button.active {
+    background: #2477dc;
+    border-color: #45d9ff;
+    color: white;
+}
+
+.quiz-box {
+    margin-top: 35px;
+    padding: 25px;
+    border-radius: 15px;
+    border: 1px solid #34547c;
+    background: #101e37;
+}
+
+.quiz-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 13px;
+    margin-top: 10px;
+    border-radius: 8px;
+    background: #0a172b;
+    border: 1px solid #304968;
+    color: white;
+    cursor: pointer;
+}
+
+.quiz-option:hover {
+    border-color: #45d9ff;
+    background: #17375c;
+}
+
+#quizFeedback {
+    margin-top: 15px;
+    color: #65d5ff;
+    font-size: 13px;
+}
+
+@keyframes appear {
+    from {opacity:0;transform:translateY(10px)}
+    to {opacity:1;transform:translateY(0)}
+}
+
+@keyframes floating {
+    0%,100% {transform:translateY(0)}
+    50% {transform:translateY(-7px)}
+}
+
+.daily-box .daily-icon {
+    font-size: 35px;
+    animation: floating 3s infinite ease-in-out;
+}
+
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#070d1c;--panel:#101c34;--blue:#448cff;--cyan:#45d9ff;--text:#edf4ff;--muted:#9aacc8}
 html{scroll-behavior:smooth}
@@ -143,21 +279,193 @@ footer{text-align:center;padding:30px 15px;color:#8094b4;border-top:1px solid #1
 </div>
 </section>
 
+
 <section id="education">
-<div class="section-title"><small>KNOWLEDGE CENTER</small><h2>Education Hub</h2><p style="color:var(--muted);margin-top:10px">Pelajari keindahan dan misteri alam semesta.</p></div>
-<div class="search-wrap"><input class="search-input" id="search" placeholder="🔍 Cari materi astronomi..."><button class="btn primary" onclick="searchEdu()">CARI</button></div>
-<div class="education" id="eduList">
-<div class="edu-item"><h3>☀️ Matahari</h3><p>Bintang pusat tata surya yang menghasilkan energi melalui fusi nuklir.</p></div>
-<div class="edu-item"><h3>🌍 Bumi</h3><p>Planet ketiga dari Matahari dan satu-satunya tempat yang diketahui mendukung kehidupan.</p></div>
-<div class="edu-item"><h3>🔴 Mars</h3><p>Planet merah yang menjadi salah satu target utama eksplorasi robotik.</p></div>
-<div class="edu-item"><h3>🪐 Saturnus</h3><p>Planet raksasa gas yang terkenal dengan sistem cincinnya.</p></div>
-<div class="edu-item"><h3>🌌 Galaksi Bima Sakti</h3><p>Galaksi tempat tata surya kita berada.</p></div>
-<div class="edu-item"><h3>🕳️ Black Hole</h3><p>Wilayah ruang-waktu dengan gravitasi sangat kuat sehingga cahaya pun tidak dapat lolos dari dalam horizon peristiwanya.</p></div>
-<div class="edu-item"><h3>✨ Nebula</h3><p>Awan gas dan debu antarbintang yang menjadi tempat berbagai proses pembentukan bintang.</p></div>
-<div class="edu-item"><h3>☄️ Komet</h3><p>Benda langit yang tersusun dari es, debu, dan material lainnya.</p></div>
-<div class="edu-item"><h3>🚀 Eksplorasi Antariksa</h3><p>Perjalanan manusia dan wahana robotik untuk mempelajari ruang angkasa.</p></div>
+<div class="section-title">
+    <small>ISEA KNOWLEDGE CENTER</small>
+    <h2>Explore The Universe</h2>
+    <p style="color:var(--muted);margin-top:10px">
+        Discover, Learn, and Understand the Universe.
+    </p>
 </div>
+
+<div class="daily-box">
+    <div class="daily-icon">🌌</div>
+    <small style="color:#45d9ff;letter-spacing:2px">
+        ASTRONOMY OF THE DAY
+    </small>
+    <h3 id="dailyTitle">Astronomy of The Day</h3>
+    <p id="dailyDescription" style="color:#bdcce3;line-height:1.8;font-size:14px"></p>
+    <button class="btn primary" onclick="openDailyLesson()">
+        EXPLORE TODAY'S TOPIC →
+    </button>
+</div>
+
+<div class="search-wrap">
+    <input class="search-input" id="search"
+    placeholder="🔍 Cari materi astronomi...">
+    <button class="btn primary" onclick="searchEdu()">CARI</button>
+</div>
+
+<div class="category-list">
+    <button class="active" onclick="filterCategory('all',this)">All</button>
+    <button onclick="filterCategory('solar',this)">Solar System</button>
+    <button onclick="filterCategory('space',this)">Deep Space</button>
+    <button onclick="filterCategory('physics',this)">Astrophysics</button>
+    <button onclick="filterCategory('exploration',this)">Exploration</button>
+</div>
+
+<div class="education" id="eduList">
+
+<div class="edu-item" data-category="solar">
+<h3>☀️ The Sun</h3>
+<p>Bintang pusat tata surya yang menghasilkan energi melalui fusi nuklir.</p>
+<button onclick="toggleLesson(this)">READ MATERIAL →</button>
+<div class="lesson-content">
+Matahari adalah bintang yang berada di pusat tata surya. Energinya dihasilkan melalui fusi nuklir, yaitu proses penggabungan inti hidrogen menjadi helium.
+
+Cahaya Matahari membutuhkan sekitar 8 menit 20 detik untuk mencapai Bumi.
+</div>
+</div>
+
+<div class="edu-item" data-category="solar">
+<h3>🌍 Earth</h3>
+<p>Planet ketiga dari Matahari dan tempat kehidupan yang kita ketahui.</p>
+<button onclick="toggleLesson(this)">READ MATERIAL →</button>
+<div class="lesson-content">
+Bumi memiliki atmosfer, air dalam bentuk cair, serta medan magnet. Ketiganya berperan penting dalam mendukung kehidupan.
+
+Bumi memiliki satu satelit alami, yaitu Bulan.
+</div>
+</div>
+
+<div class="edu-item" data-category="solar">
+<h3>🔴 Mars</h3>
+<p>Planet merah yang menjadi target eksplorasi antariksa.</p>
+<button onclick="toggleLesson(this)">READ MATERIAL →</button>
+<div class="lesson-content">
+Mars mendapatkan warna merah dari oksida besi pada permukaannya.
+
+Mars memiliki gunung berapi terbesar yang diketahui di tata surya, Olympus Mons, serta ngarai raksasa bernama Valles Marineris.
+</div>
+</div>
+
+<div class="edu-item" data-category="solar">
+<h3>🪐 Saturn</h3>
+<p>Planet raksasa gas dengan sistem cincin yang menakjubkan.</p>
+<button onclick="toggleLesson(this)">READ MATERIAL →</button>
+<div class="lesson-content">
+Saturnus sebagian besar tersusun atas hidrogen dan helium. Cincinnya terdiri dari partikel es dan batuan dengan berbagai ukuran.
+
+Salah satu satelit alaminya yang terkenal adalah Titan.
+</div>
+</div>
+
+<div class="edu-item" data-category="space">
+<h3>🌌 Milky Way</h3>
+<p>Galaksi tempat tata surya kita berada.</p>
+<button onclick="toggleLesson(this)">READ MATERIAL →</button>
+<div class="lesson-content">
+Bima Sakti merupakan galaksi spiral berbatang yang berisi ratusan miliar bintang.
+
+Tata surya berada di struktur spiral yang disebut Lengan Orion. Di pusat galaksi terdapat black hole supermasif Sagittarius A*.
+</div>
+</div>
+
+<div class="edu-item" data-category="physics">
+<h3>🕳️ Black Hole</h3>
+<p>Wilayah ruang-waktu dengan gravitasi yang sangat kuat.</p>
+<button onclick="toggleLesson(this)">READ MATERIAL →</button>
+<div class="lesson-content">
+Black hole merupakan wilayah ruang-waktu yang memiliki gravitasi ekstrem. Setelah melewati event horizon, tidak ada sesuatu pun yang dapat kembali keluar, termasuk cahaya.
+
+Black hole dapat terbentuk melalui keruntuhan gravitasi bintang masif.
+</div>
+</div>
+
+<div class="edu-item" data-category="space">
+<h3>✨ Nebula</h3>
+<p>Awan gas dan debu yang tersebar di ruang antarbintang.</p>
+<button onclick="toggleLesson(this)">READ MATERIAL →</button>
+<div class="lesson-content">
+Nebula merupakan kumpulan gas dan debu antarbintang. Sebagian nebula menjadi tempat pembentukan bintang baru.
+
+Contohnya adalah Orion Nebula.
+</div>
+</div>
+
+<div class="edu-item" data-category="physics">
+<h3>⭐ Neutron Stars</h3>
+<p>Sisa inti bintang masif yang mengalami keruntuhan gravitasi.</p>
+<button onclick="toggleLesson(this)">READ MATERIAL →</button>
+<div class="lesson-content">
+Bintang neutron terbentuk setelah inti bintang masif runtuh, biasanya dalam proses yang berkaitan dengan supernova.
+
+Objek ini memiliki kepadatan luar biasa. Sebagian bintang neutron dikenal sebagai pulsar.
+</div>
+</div>
+
+<div class="edu-item" data-category="space">
+<h3>🌠 Supernova</h3>
+<p>Ledakan bintang yang sangat energetik.</p>
+<button onclick="toggleLesson(this)">READ MATERIAL →</button>
+<div class="lesson-content">
+Supernova merupakan peristiwa ledakan bintang tertentu pada tahap akhir evolusinya.
+
+Peristiwa ini dapat menyebarkan berbagai unsur ke ruang antarbintang dan memengaruhi pembentukan generasi bintang berikutnya.
+</div>
+</div>
+
+<div class="edu-item" data-category="exploration">
+<h3>🚀 Space Exploration</h3>
+<p>Penjelajahan ruang angkasa menggunakan teknologi manusia dan robotik.</p>
+<button onclick="toggleLesson(this)">READ MATERIAL →</button>
+<div class="lesson-content">
+Eksplorasi antariksa membantu manusia mempelajari planet, asteroid, komet, dan objek kosmik lainnya.
+
+Contohnya misi Voyager, Perseverance, dan Dragonfly.
+</div>
+</div>
+
+<div class="edu-item" data-category="exploration">
+<h3>🔭 James Webb Telescope</h3>
+<p>Teleskop luar angkasa yang dirancang untuk mengamati inframerah.</p>
+<button onclick="toggleLesson(this)">READ MATERIAL →</button>
+<div class="lesson-content">
+James Webb Space Telescope diluncurkan pada Desember 2021.
+JWST digunakan untuk mempelajari galaksi awal, pembentukan bintang, dan atmosfer eksoplanet melalui pengamatan inframerah.
+</div>
+</div
+<div class="edu-item" data-category="physics">
+<h3>🪐 Exoplanets</h3>
+<p>Planet yang mengorbit bintang selain Matahari.</p>
+<button onclick="toggleLesson(this)">READ MATERIAL →</button>
+<div class="lesson-content">
+Eksoplanet adalah planet di luar tata surya. Para astronom menemukannya melalui metode transit dan kecepatan radial.
+Penelitian ini membantu memahami keragaman sistem planet di alam semesta.
+</div>
+</div>
+
+</div>
+
+<div class="quiz-box">
+<small style="color:#45d9ff;letter-spacing:2px">
+TEST YOUR KNOWLEDGE
+</small>
+<h2 style="margin:12px 0">🧠 Astronomy Quiz</h2>
+<p id="quizQuestion" style="color:#c5d7ef"></p>
+<div id="quizOptions"></div>
+<p id="quizFeedback"></p>
+<button class="btn primary" onclick="nextQuiz()">
+NEXT QUESTION →
+</button>
+<p style="color:#8da4c5;font-size:12px;margin-top:15px">
+Score: <span id="quizScore">0</span>
+</p>
+</div>
+
 </section>
+
 
 <section id="about">
 <div class="section-title"><small>ABOUT US</small><h2>Tentang ISEA</h2></div>
@@ -241,6 +549,227 @@ const q=document.getElementById('search').value.toLowerCase();
 document.querySelectorAll('.edu-item').forEach(x=>x.style.display=x.textContent.toLowerCase().includes(q)?'':'none');
 }
 document.getElementById('search').addEventListener('input',searchEdu);
+// ===== ISEA EDUCATION SYSTEM =====
+
+const dailyTopics = [
+{
+title:"The Mystery of Black Holes",
+icon:"🕳️",
+description:"Explore one of the most extreme objects in the universe and understand how gravity can bend spacetime."
+},
+{
+title:"The Beauty of Nebulae",
+icon:"🌌",
+description:"Discover enormous clouds of gas and dust where new stars can form."
+},
+{
+title:"Exploring Saturn",
+icon:"🪐",
+description:"Learn about Saturn's magnificent rings and its fascinating natural satellites."
+},
+{
+title:"The James Webb Telescope",
+icon:"🔭",
+description:"Discover how infrared observations help astronomers investigate distant galaxies."
+},
+{
+title:"Neutron Stars",
+icon:"⭐",
+description:"Explore the incredibly dense remnants of massive stars."
+}
+];
+
+const today = new Date();
+const dayNumber = Math.floor(
+(Date.UTC(today.getFullYear(),today.getMonth(),today.getDate()) -
+Date.UTC(today.getFullYear(),0,0))/86400000
+);
+
+const daily = dailyTopics[dayNumber % dailyTopics.length];
+
+document.getElementById("dailyTitle").textContent=daily.title;
+document.getElementById("dailyDescription").textContent=daily.description;
+document.querySelector(".daily-icon").textContent=daily.icon;
+
+function openDailyLesson(){
+const cards=[...document.querySelectorAll(".edu-item")];
+const keyword=daily.title.toLowerCase();
+
+const target=cards.find(card=>{
+const title=card.querySelector("h3").textContent.toLowerCase();
+
+return keyword.includes("black hole") ? title.includes("black hole") :
+keyword.includes("nebula") ? title.includes("nebula") :
+keyword.includes("saturn") ? title.includes("saturn") :
+keyword.includes("james webb") ? title.includes("james webb") :
+keyword.includes("neutron") ? title.includes("neutron") : false;
+});
+
+if(target){
+target.scrollIntoView({behavior:"smooth",block:"center"});
+const content=target.querySelector(".lesson-content");
+
+if(!content.classList.contains("open")){
+toggleLesson(target.querySelector("button"));
+}
+}
+}
+
+function toggleLesson(button){
+const content=button.nextElementSibling;
+const isOpen=content.classList.toggle("open");
+
+button.textContent=isOpen
+?"CLOSE MATERIAL ↑"
+:"READ MATERIAL →";
+}
+
+function filterCategory(category,button){
+document.querySelectorAll(".category-list button")
+.forEach(b=>b.classList.remove("active"));
+
+button.classList.add("active");
+
+document.querySelectorAll(".edu-item").forEach(card=>{
+card.style.display=
+category==="all" ||
+card.dataset.category===category
+?"":"none";
+});
+
+document.getElementById("search").value="";
+}
+
+function searchEdu(){
+const query=document.getElementById("search")
+.value.toLowerCase();
+
+document.querySelectorAll(".edu-item").forEach(card=>{
+card.style.display=
+card.textContent.toLowerCase().includes(query)
+?"":"none";
+});
+
+document.querySelectorAll(".category-list button")
+.forEach(b=>b.classList.remove("active"));
+}
+
+document.getElementById("search")
+.addEventListener("input",searchEdu);
+
+
+// ===== ASTRONOMY QUIZ =====
+
+const quizData=[
+{
+q:"Planet apa yang dikenal sebagai Planet Merah?",
+options:["Venus","Mars","Jupiter","Neptune"],
+answer:1,
+info:"Mars memiliki permukaan yang kaya akan oksida besi."
+},
+{
+q:"Apa nama galaksi tempat tata surya berada?",
+options:["Andromeda","Sombrero","Bima Sakti","Whirlpool"],
+answer:2,
+info:"Tata surya kita berada di galaksi Bima Sakti."
+},
+{
+q:"Apa nama batas black hole yang tidak dapat dilewati cahaya untuk kembali keluar?",
+options:["Photosphere","Event Horizon","Corona","Singularity"],
+answer:1,
+info:"Event horizon merupakan batas wilayah tanpa jalan keluar."
+},
+{
+q:"James Webb terutama mengamati panjang gelombang apa?",
+options:["Inframerah","Gelombang suara","Radio saja","Ultraviolet saja"],
+answer:0,
+info:"JWST dirancang terutama untuk pengamatan inframerah."
+},
+{
+q:"Apa sumber energi utama Matahari?",
+options:["Pembakaran gas","Fusi nuklir","Listrik","Gesekan"],
+answer:1,
+info:"Matahari menghasilkan energi melalui fusi nuklir."
+},
+{
+q:"Satelit alami terbesar Saturnus adalah?",
+options:["Europa","Titan","Phobos","Deimos"],
+answer:1,
+info:"Titan adalah satelit terbesar Saturnus."
+}
+];
+
+let quizIndex=0;
+let score=0;
+let answered=false;
+
+function loadQuiz(){
+const q=quizData[quizIndex];
+
+document.getElementById("quizQuestion").textContent=
+(quizIndex+1)+". "+q.q;
+
+const container=document.getElementById("quizOptions");
+container.innerHTML="";
+
+answered=false;
+document.getElementById("quizFeedback").textContent="";
+
+q.options.forEach((option,index)=>{
+const btn=document.createElement("button");
+
+btn.className="quiz-option";
+btn.textContent=option;
+btn.onclick=()=>checkAnswer(index);
+
+container.appendChild(btn);
+});
+}
+
+function checkAnswer(index){
+if(answered)return;
+
+answered=true;
+
+const q=quizData[quizIndex];
+const feedback=document.getElementById("quizFeedback");
+
+if(index===q.answer){
+score++;
+feedback.textContent="✓ Correct! "+q.info;
+}else{
+feedback.textContent="✗ Not quite. Jawaban: "+
+q.options[q.answer]+". "+q.info;
+}
+
+document.getElementById("quizScore").textContent=score;
+
+document.querySelectorAll(".quiz-option")
+.forEach(btn=>btn.disabled=true);
+}
+
+function nextQuiz(){
+quizIndex++;
+
+if(quizIndex>=quizData.length){
+document.getElementById("quizQuestion").textContent=
+"🎉 Quiz completed! Your score: "+score+"/"+quizData.length;
+
+document.getElementById("quizOptions").innerHTML="";
+
+document.getElementById("quizFeedback").textContent=
+"Terus belajar dan jelajahi alam semesta bersama ISEA!";
+
+quizIndex=-1;
+return;
+}
+
+loadQuiz();
+}
+
+loadQuiz();
+
+
 showStep();
 </script>
 </body>
