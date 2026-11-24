@@ -162,19 +162,17 @@ nav a::after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;
 
 <div class="flex flex-wrap justify-center gap-3 mt-5"><button class="btn bp" onclick="dl()">DOWNLOAD CARD (PNG)</button><button class="btn" onclick="again()">BATAL / ULANGI</button></div></div>
 
-<!-- Panel Admin Pembuat -->
-<div class="mt-8 pt-6 border-t border-white/10">
+<!-- Panel Admin Pembuat (1x PIN Claim, hilang di perangkat orang lain setelah diklaim) -->
+<div id="adminWrap" class="hidden mt-8 pt-6 border-t border-white/10">
   <div class="flex items-center justify-between gap-2">
     <span class="text-xs font-bold pu tracking-wider">ADMIN APPROVAL PANEL</span>
-    <button class="btn !py-2 !px-3" onclick="toggleAdminPanel()">Buka / Tutup Panel</button>
+    <button id="adminRefreshBtn" class="hidden btn !py-2 !px-3" onclick="loadApplicants()">Refresh Data</button>
   </div>
-  <div id="adminPanel" class="hidden mt-4 space-y-4">
-    <div class="flex gap-2">
-      <input id="adminPin" type="password" class="inp !py-2.5 text-xs" placeholder="Masukkan PIN Pembuat...">
-      <button class="btn bp shrink-0" onclick="loadApplicants()">Muat Data</button>
-    </div>
-    <div id="adminList" class="space-y-3 text-xs"></div>
+  <div id="pinClaimBox" class="hidden mt-4 flex gap-2">
+    <input id="adminPin" type="password" autocomplete="off" autocorrect="off" class="inp !py-2.5 text-xs" placeholder="Masukkan PIN 1x...">
+    <button class="btn bp shrink-0" onclick="claimAdmin()">Klaim Akses</button>
   </div>
+  <div id="adminList" class="mt-4 space-y-3 text-xs"></div>
 </div>
 </div></div></section>
 
@@ -211,7 +209,8 @@ const WA_GROUPS=[
  {name:"Grup WhatsApp 2",url:""}
 ];
 const DB_URL="https://isea-50356-default-rtdb.asia-southeast1.firebasedatabase.app";
-const ADMIN_PIN="ISEA2026"; // Ganti sesuai PIN rahasia kamu
+const ADMIN_PIN="ISEA2026";
+const ADMIN_LOCAL_KEY="isea_owner_verified_v1";
 
 const NAV=[["hero","Home"],["features","Fitur"],["solar","Tata Surya"],["edu","Artikel"],["join","Daftar"],["quiz","Quiz"],["about","Tentang"]];
 $("mnav").innerHTML=NAV.map(n=>`<a href="#${n[0]}" class="block py-1.5 text-slate-300">${n[1]}</a>`).join("");
@@ -222,7 +221,7 @@ $("tkr").innerHTML=TK+TK;
 $("feat").innerHTML=[["01","ISEA Selection & ID Card","Form 8 langkah dengan validasi input dan kartu anggota PNG."],["02","Pusat Artikel","15 artikel dengan rujukan ke NASA, ESA, BRIN, dan Bosscha."],["03","Solar Explorer","Bandingkan jarak, waktu cahaya, suhu, dan gravitasi tiap objek."],["04","Berat di Planet Lain","Hitung estimasi berat di Mars, Jupiter, dan objek lainnya."],["05","Fase Bulan Live","Fase dan iluminasi Bulan dihitung berdasarkan tanggal hari ini."],["06","Quiz Berwaktu","30 soal, timer 20 detik, streak, dan peringkat akhir."]].map((f,i)=>`<div class="card p-6 lift" style="--i:${i}"><div class="text-xs font-mono font-bold pu mb-3">${f[0]}</div><h3 class="sp font-bold mb-1">${f[1]}</h3><p class="text-slate-300 text-sm">${f[2]}</p></div>`).join("");
 $("dir").innerHTML=[["NASA Science","https://science.nasa.gov/","Misi planet, astrofisika, eksoplanet"],["ESA Science","https://www.esa.int/Science_Exploration","Euclid, Gaia, kosmologi"],["Observatorium Bosscha","https://bosscha.itb.ac.id/","Observatorium tertua di Indonesia"],["BRIN","https://www.brin.go.id/","Riset antariksa dan cuaca antariksa"],["Webb Telescope","https://webbtelescope.org/","Citra inframerah resmi STScI"],["Stellarium Web","https://stellarium-web.org/","Peta langit interaktif real-time"]].map((d,i)=>`<a href="${d[1]}" target="_blank" rel="noopener noreferrer" class="card p-5 lift block" style="--i:${i}"><b class="sp cy">${d[0]} ↗</b><p class="text-xs mu mt-1">${d[2]}</p></a>`).join("");
 
-/* ===== Animasi: bintang, progress, cursor, reveal, counter, typed ===== */
+/* ===== Animasi ===== */
 const cv=$("stars"),cx=cv.getContext("2d");let W,H,S=[],SH=[];
 function rs(){W=cv.width=innerWidth;H=cv.height=innerHeight;S=Array.from({length:Math.min(140,W/8)},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.4+.3,p:Math.random()*6,s:Math.random()*.02+.005}))}
 addEventListener("resize",rs);rs();
@@ -446,10 +445,57 @@ function dl(){
   toast("Kartu tersimpan.");
 }
 
-/* ===== Admin Panel Pembuat ===== */
-function toggleAdminPanel(){$("adminPanel").classList.toggle("hidden")}
+/* ===== Admin Panel Pembuat (1x Klaim PIN + Auto Hapus Gambar Setelah Diproses) ===== */
+function isLocalOwner(){
+  try{return localStorage.getItem(ADMIN_LOCAL_KEY)==="1"}catch(e){return false}
+}
+
+async function initAdminState(){
+  try{
+    const urlParams=new URLSearchParams(location.search);
+    if(urlParams.get("resetadmin")===ADMIN_PIN){
+      await fetch(`${DB_URL}/adminConfig/claimed.json`,{
+        method:"PUT",headers:{"Content-Type":"application/json"},body:"false"
+      });
+      localStorage.setItem(ADMIN_LOCAL_KEY,"1");
+      history.replaceState(null,"",location.pathname+location.hash);
+    }
+    const r=await fetch(`${DB_URL}/adminConfig/claimed.json`);
+    const claimed=await r.json();
+    if(isLocalOwner()){
+      $("adminWrap").classList.remove("hidden");
+      $("pinClaimBox").classList.add("hidden");
+      $("adminRefreshBtn").classList.remove("hidden");
+      loadApplicants();
+    }else if(!claimed){
+      $("adminWrap").classList.remove("hidden");
+      $("pinClaimBox").classList.remove("hidden");
+    }else{
+      $("adminWrap").classList.add("hidden");
+    }
+  }catch(e){}
+}
+
+async function claimAdmin(){
+  if($("adminPin").value!==ADMIN_PIN)return toast("PIN salah.");
+  try{
+    await fetch(`${DB_URL}/adminConfig/claimed.json`,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body:"true"
+    });
+    localStorage.setItem(ADMIN_LOCAL_KEY,"1");
+    $("pinClaimBox").classList.add("hidden");
+    $("adminRefreshBtn").classList.remove("hidden");
+    toast("PIN diklaim! Input PIN dihapus dari semua perangkat lain.");
+    loadApplicants();
+  }catch(e){
+    toast("Gagal mengklaim akses admin.");
+  }
+}
+
 async function loadApplicants(){
-  if($("adminPin").value!==ADMIN_PIN)return toast("PIN pembuat salah.");
+  if(!isLocalOwner())return;
   $("adminList").innerHTML='<p class="mu">Memuat data pendaftar...</p>';
   try{
     const r=await fetch(`${DB_URL}/registrations.json`);
@@ -479,14 +525,14 @@ async function loadApplicants(){
 }
 
 async function setDecision(id,status){
-  if($("adminPin").value!==ADMIN_PIN)return toast("PIN pembuat salah.");
+  if(!isLocalOwner())return;
   try{
-    await fetch(`${DB_URL}/registrations/${encodeURIComponent(id)}/status.json`,{
-      method:"PUT",
+    await fetch(`${DB_URL}/registrations/${encodeURIComponent(id)}.json`,{
+      method:"PATCH",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(status)
+      body:JSON.stringify({status:status,cardData:null})
     });
-    toast(status==="APPROVED"?"Pendaftar diterima.":"Pendaftar ditolak.");
+    toast(status==="APPROVED"?"Pendaftar diterima & gambar kartu dibersihkan.":"Pendaftar ditolak & gambar kartu dibersihkan.");
     loadApplicants();
   }catch(e){
     toast("Gagal mengubah status.");
@@ -494,6 +540,7 @@ async function setDecision(id,status){
 }
 
 drawStep();
+initAdminState();
 try{
   const saved=JSON.parse(localStorage.getItem("isea_member_v2")||"null");
   if(saved&&saved.id){
