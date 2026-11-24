@@ -162,7 +162,7 @@ nav a::after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;
 
 <div class="flex flex-wrap justify-center gap-3 mt-5"><button class="btn bp" onclick="dl()">DOWNLOAD CARD (PNG)</button><button class="btn" onclick="again()">BATAL / ULANGI</button></div></div>
 
-<!-- Panel Admin Pembuat (1x PIN Claim, hilang di perangkat orang lain setelah diklaim) -->
+<!-- Panel Admin Pembuat -->
 <div id="adminWrap" class="hidden mt-8 pt-6 border-t border-white/10">
   <div class="flex items-center justify-between gap-2">
     <span class="text-xs font-bold pu tracking-wider">ADMIN APPROVAL PANEL</span>
@@ -210,7 +210,7 @@ const WA_GROUPS=[
 ];
 const DB_URL="https://isea-50356-default-rtdb.asia-southeast1.firebasedatabase.app";
 const ADMIN_PIN="ISEA2026";
-const ADMIN_LOCAL_KEY="isea_owner_verified_v1";
+const ADMIN_LOCAL_KEY="isea_owner_verified_v2";
 
 const NAV=[["hero","Home"],["features","Fitur"],["solar","Tata Surya"],["edu","Artikel"],["join","Daftar"],["quiz","Quiz"],["about","Tentang"]];
 $("mnav").innerHTML=NAV.map(n=>`<a href="#${n[0]}" class="block py-1.5 text-slate-300">${n[1]}</a>`).join("");
@@ -445,9 +445,27 @@ function dl(){
   toast("Kartu tersimpan.");
 }
 
-/* ===== Admin Panel Pembuat (1x Klaim PIN + Auto Hapus Gambar Setelah Diproses) ===== */
+/* ===== Admin Panel Pembuat (3-Layer Persistence + Hard Delete cardData) ===== */
+function setOwnerSession(){
+  try{localStorage.setItem(ADMIN_LOCAL_KEY,"1")}catch(e){}
+  try{sessionStorage.setItem(ADMIN_LOCAL_KEY,"1")}catch(e){}
+  try{document.cookie=`${ADMIN_LOCAL_KEY}=1; max-age=31536000; path=/; SameSite=Lax`}catch(e){}
+}
+
 function isLocalOwner(){
-  try{return localStorage.getItem(ADMIN_LOCAL_KEY)==="1"}catch(e){return false}
+  let ok=false;
+  try{if(localStorage.getItem(ADMIN_LOCAL_KEY)==="1")ok=true}catch(e){}
+  try{if(sessionStorage.getItem(ADMIN_LOCAL_KEY)==="1")ok=true}catch(e){}
+  try{if(document.cookie.split(";").some(c=>c.trim()===`${ADMIN_LOCAL_KEY}=1`))ok=true}catch(e){}
+  if(ok)setOwnerSession();
+  return ok;
+}
+
+function renderOwnerPanel(){
+  $("adminWrap").classList.remove("hidden");
+  $("pinClaimBox").classList.add("hidden");
+  $("adminRefreshBtn").classList.remove("hidden");
+  loadApplicants();
 }
 
 async function initAdminState(){
@@ -457,17 +475,18 @@ async function initAdminState(){
       await fetch(`${DB_URL}/adminConfig/claimed.json`,{
         method:"PUT",headers:{"Content-Type":"application/json"},body:"false"
       });
-      localStorage.setItem(ADMIN_LOCAL_KEY,"1");
+      setOwnerSession();
       history.replaceState(null,"",location.pathname+location.hash);
+      renderOwnerPanel();
+      return;
+    }
+    if(isLocalOwner()){
+      renderOwnerPanel();
+      return;
     }
     const r=await fetch(`${DB_URL}/adminConfig/claimed.json`);
     const claimed=await r.json();
-    if(isLocalOwner()){
-      $("adminWrap").classList.remove("hidden");
-      $("pinClaimBox").classList.add("hidden");
-      $("adminRefreshBtn").classList.remove("hidden");
-      loadApplicants();
-    }else if(!claimed){
+    if(!claimed){
       $("adminWrap").classList.remove("hidden");
       $("pinClaimBox").classList.remove("hidden");
     }else{
@@ -477,18 +496,17 @@ async function initAdminState(){
 }
 
 async function claimAdmin(){
-  if($("adminPin").value!==ADMIN_PIN)return toast("PIN salah.");
+  const typedPin=($("adminPin").value||"").trim();
+  if(typedPin!==ADMIN_PIN)return toast("PIN salah.");
   try{
     await fetch(`${DB_URL}/adminConfig/claimed.json`,{
       method:"PUT",
       headers:{"Content-Type":"application/json"},
       body:"true"
     });
-    localStorage.setItem(ADMIN_LOCAL_KEY,"1");
-    $("pinClaimBox").classList.add("hidden");
-    $("adminRefreshBtn").classList.remove("hidden");
-    toast("PIN diklaim! Input PIN dihapus dari semua perangkat lain.");
-    loadApplicants();
+    setOwnerSession();
+    toast("PIN diklaim! Sesi disimpan di perangkat ini.");
+    renderOwnerPanel();
   }catch(e){
     toast("Gagal mengklaim akses admin.");
   }
@@ -503,7 +521,7 @@ async function loadApplicants(){
     if(!raw)return $("adminList").innerHTML='<p class="mu">Belum ada pendaftar.</p>';
     const list=Object.values(raw).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
     $("adminList").innerHTML=list.map(x=>`
-      <div class="p-4 rounded-2xl bg-[#040712] border border-white/15 space-y-3">
+      <div id="app-${esc(x.id)}" class="p-4 rounded-2xl bg-[#040712] border border-white/15 space-y-3">
         <div class="flex flex-wrap justify-between gap-2">
           <div>
             <b class="sp text-sm">${esc(x.name)}</b> <span class="cy">${esc(x.tiktok)}</span>
@@ -512,7 +530,7 @@ async function loadApplicants(){
           <span class="px-2.5 py-1 rounded-full text-[10px] font-bold h-fit ${x.status==="APPROVED"?"bg-emerald-500/20 text-emerald-300":x.status==="REJECTED"?"bg-rose-500/20 text-rose-300":"bg-amber-500/20 text-amber-300"}">${esc(x.status||"PENDING")}</span>
         </div>
         ${x.reason?`<p class="text-slate-300 text-xs bg-white/5 p-2.5 rounded-xl">"${esc(x.reason)}"</p>`:""}
-        ${x.cardData?`<img src="${x.cardData}" alt="Kartu ${esc(x.name)}" class="w-full max-w-[340px] rounded-xl border border-white/15">`:""}
+        ${x.cardData?`<img id="img-${esc(x.id)}" src="${x.cardData}" alt="Kartu ${esc(x.name)}" class="w-full max-w-[340px] rounded-xl border border-white/15">`:""}
         <div class="flex gap-2">
           <button class="btn bg !py-2 !px-3" onclick="setDecision('${esc(x.id)}','APPROVED')">Terima</button>
           <button class="btn br !py-2 !px-3" onclick="setDecision('${esc(x.id)}','REJECTED')">Tolak</button>
@@ -527,12 +545,17 @@ async function loadApplicants(){
 async function setDecision(id,status){
   if(!isLocalOwner())return;
   try{
-    await fetch(`${DB_URL}/registrations/${encodeURIComponent(id)}.json`,{
-      method:"PATCH",
+    await fetch(`${DB_URL}/registrations/${encodeURIComponent(id)}/status.json`,{
+      method:"PUT",
       headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({status:status,cardData:null})
+      body:JSON.stringify(status)
     });
-    toast(status==="APPROVED"?"Pendaftar diterima & gambar kartu dibersihkan.":"Pendaftar ditolak & gambar kartu dibersihkan.");
+    await fetch(`${DB_URL}/registrations/${encodeURIComponent(id)}/cardData.json`,{
+      method:"DELETE"
+    });
+    const imgEl=$("img-"+id);
+    if(imgEl)imgEl.remove();
+    toast(status==="APPROVED"?"Pendaftar diterima & gambar kartu dihapus.":"Pendaftar ditolak & gambar kartu dihapus.");
     loadApplicants();
   }catch(e){
     toast("Gagal mengubah status.");
