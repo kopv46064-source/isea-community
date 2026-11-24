@@ -36,8 +36,9 @@ body{font-family:'Plus Jakarta Sans',sans-serif;color:var(--tx);background:radia
 .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .bp{background:linear-gradient(135deg,#7c3aed,#4f46e5);border-color:rgba(138,100,245,.5)}.bp:hover{box-shadow:0 0 30px -4px rgba(138,100,245,.6)}
 .bg{background:linear-gradient(135deg,#059669,#0d9488);border-color:rgba(16,185,129,.5)}.bg:hover{box-shadow:0 0 30px -4px rgba(16,185,129,.55)}
-.bp::after,.bg::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:rgba(255,255,255,.25);transform:skewX(-20deg)}
-.bp:hover::after,.bg:hover::after{animation:shine .7s}
+.br{background:linear-gradient(135deg,#e11d48,#be123c);border-color:rgba(244,63,94,.5)}
+.bp::after,.bg::after,.br::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:rgba(255,255,255,.25);transform:skewX(-20deg)}
+.bp:hover::after,.bg:hover::after,.br:hover::after{animation:shine .7s}
 .rv{opacity:0;transform:translateY(30px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
 .rv.show{opacity:1;transform:none}
 .rv.show .stg>*{animation:rise .65s cubic-bezier(.16,1,.3,1) backwards;animation-delay:calc(var(--i,0)*70ms)}
@@ -142,7 +143,9 @@ nav a::after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;
 <div id="sbox"></div>
 <p id="err" class="hidden mt-4 text-xs font-semibold text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-xl px-4 py-3"></p>
 <div class="flex justify-between mt-7"><button class="btn" id="bk">← KEMBALI</button><button class="btn bp" id="nx">LANJUT →</button></div></div>
-<div id="mr" class="hidden text-center"><small class="pu font-bold text-xs tracking-[.2em]">ISEA OFFICIAL MEMBER</small><h3 class="sp text-2xl font-bold mt-1 mb-5">Member ISEA Terdaftar</h3>
+
+<div id="mr" class="hidden text-center"><small class="pu font-bold text-xs tracking-[.2em]">ISEA OFFICIAL MEMBER</small><h3 class="sp text-2xl font-bold mt-1 mb-3">Kartu Pendaftar ISEA</h3>
+<div id="stBadge" class="inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-4"></div>
 <div id="idc" class="max-w-[420px] mx-auto p-6 rounded-3xl text-left relative overflow-hidden border border-violet-400/40 shadow-2xl bg-gradient-to-br from-[#1d2c54] via-[#28114f] to-[#0a0f20]" style="transition:transform .2s">
 <div class="absolute -right-14 -top-14 w-44 h-44 rounded-full bg-violet-400/20 blur-xl"></div>
 <div class="flex justify-between text-xs font-bold"><b class="pu tracking-[.2em]">ISEA</b><span>OFFICIAL MEMBER</span></div>
@@ -150,9 +153,29 @@ nav a::after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;
 <div id="cav" class="w-16 h-16 rounded-full bg-violet-400/20 border-2 border-violet-400 mt-5 mb-2 flex items-center justify-center text-xs font-bold pu">ISEA</div>
 <h3 id="cn" class="sp text-2xl font-bold break-words"></h3><p id="cu" class="text-xs text-slate-300 mt-1"></p><p id="cc" class="text-xs text-slate-300"></p><p id="cs" class="cy text-xs font-semibold mt-2"></p>
 <div class="border-t border-white/20 mt-5 pt-3 flex justify-between text-[10px] tracking-wider pu"><span>REGISTERED BY ISEA SYSTEM</span><span>by KovTheGreat</span></div></div>
-<div class="mt-7 mb-2 text-xs mu">Gabung grup WhatsApp ISEA:</div>
-<div class="flex flex-wrap justify-center gap-3" id="wa"></div>
-<div class="flex flex-wrap justify-center gap-3 mt-4"><button class="btn bp" onclick="dl()">DOWNLOAD CARD (PNG)</button><button class="btn" onclick="again()">DAFTAR LAGI</button></div></div>
+
+<div id="waBox" class="hidden">
+  <div class="mt-7 mb-2 text-xs mu">Pendaftaran disetujui! Gabung grup WhatsApp ISEA:</div>
+  <div class="flex flex-wrap justify-center gap-3" id="wa"></div>
+</div>
+<div id="pendNote" class="mt-5 text-xs mu">Halaman ini memantau persetujuan pembuat secara otomatis. Jika ditolak, pendaftaran akan direset.</div>
+
+<div class="flex flex-wrap justify-center gap-3 mt-5"><button class="btn bp" onclick="dl()">DOWNLOAD CARD (PNG)</button><button class="btn" onclick="again()">BATAL / ULANGI</button></div></div>
+
+<!-- Panel Admin Pembuat -->
+<div class="mt-8 pt-6 border-t border-white/10">
+  <div class="flex items-center justify-between gap-2">
+    <span class="text-xs font-bold pu tracking-wider">ADMIN APPROVAL PANEL</span>
+    <button class="btn !py-2 !px-3" onclick="toggleAdminPanel()">Buka / Tutup Panel</button>
+  </div>
+  <div id="adminPanel" class="hidden mt-4 space-y-4">
+    <div class="flex gap-2">
+      <input id="adminPin" type="password" class="inp !py-2.5 text-xs" placeholder="Masukkan PIN Pembuat...">
+      <button class="btn bp shrink-0" onclick="loadApplicants()">Muat Data</button>
+    </div>
+    <div id="adminList" class="space-y-3 text-xs"></div>
+  </div>
+</div>
 </div></div></section>
 
 <section id="quiz" class="rv py-20 max-w-2xl mx-auto px-4">
@@ -181,11 +204,15 @@ nav a::after{content:"";position:absolute;left:0;bottom:-6px;height:2px;width:0;
 <script>
 const $=i=>document.getElementById(i),esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
-/* ===== WHATSAPP: isi link grup di sini ===== */
+
+/* ===== KONFIGURASI WHATSAPP & FIREBASE (isea daftar) ===== */
 const WA_GROUPS=[
  {name:"Grup WhatsApp 1",url:"https://chat.whatsapp.com/FECb4Eyz9Gi51WXn8vThfM?s=cl&p=a&iam=2"},
- {name:"Grup WhatsApp 2",url:""} /* tempel link grup kedua di sini */
+ {name:"Grup WhatsApp 2",url:""}
 ];
+const DB_URL="https://isea-50356-default-rtdb.asia-southeast1.firebasedatabase.app";
+const ADMIN_PIN="ISEA2026"; // Ganti sesuai PIN rahasia kamu
+
 const NAV=[["hero","Home"],["features","Fitur"],["solar","Tata Surya"],["edu","Artikel"],["join","Daftar"],["quiz","Quiz"],["about","Tentang"]];
 $("mnav").innerHTML=NAV.map(n=>`<a href="#${n[0]}" class="block py-1.5 text-slate-300">${n[1]}</a>`).join("");
 $("burger").onclick=()=>$("mnav").classList.toggle("hidden");
@@ -214,7 +241,7 @@ document.addEventListener("pointermove",e=>{const c=e.target.closest&&e.target.c
 document.addEventListener("pointerout",e=>{const c=e.target.closest&&e.target.closest(".lift,#idc");if(c)c.style.transform=""});
 const WORDS=["Astronomi","Astrofisika","Black Hole","Eksoplanet","Nebula"];let wi=0,ci=0,del=false;
 (function ty(){const w=WORDS[wi];$("typed").textContent=w.slice(0,ci)+"▍";if(!del&&ci===w.length){del=true;return setTimeout(ty,1400)}if(del&&ci===0){del=false;wi=(wi+1)%WORDS.length}ci+=del?-1:1;setTimeout(ty,del?45:90)})();
-let tt;function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),2400)}
+let tt;function toast(m){const t=$("toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),2600)}
 function confetti(){if(RM)return;const c=$("conf"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;const cols=["#b191ff","#38bdf8","#fb923c","#fff","#34d399"],P=Array.from({length:130},()=>({x:innerWidth/2,y:innerHeight*.6,vx:(Math.random()-.5)*16,vy:-Math.random()*16-4,s:Math.random()*7+3,c:cols[Math.random()*5|0],r:Math.random()*6}));let f=0;(function d(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.r+=.2;x.fillStyle=p.c;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);x.restore()});++f<150?requestAnimationFrame(d):x.clearRect(0,0,c.width,c.height)})()}
 addEventListener("keydown",e=>{if(e.key==="/"&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();$("q").focus();$("edu").scrollIntoView({behavior:"smooth"})}if(e.key==="Escape")closeM()});
 
@@ -268,10 +295,11 @@ $("modal").onclick=e=>{if(e.target===$("modal"))closeM()};
 const DT=[["Black Hole Supermasif","Pusat banyak galaksi besar menampung lubang hitam bermassa jutaan hingga miliaran Matahari."],["Cincin Saturnus","Lebarnya lebih dari 280.000 km, tetapi tebal rata-ratanya hanya sekitar 10 meter."],["Nebula Orion","Terlihat dengan mata telanjang sebagai bintang buram di pedang sang pemburu."],["Tahun Galaktik","Tata Surya butuh ±230 juta tahun untuk mengorbit pusat Bima Sakti."],["Cermin Webb","Dilapisi emas setipis ±100 nanometer agar memantulkan inframerah secara optimal."],["Bintang Neutron","Satu sendok teh materinya bermassa sekitar 1 miliar ton."],["Bosscha","Di lintang ±6°49’ LS, Bosscha dapat mengamati langit utara dan selatan."]];
 let di=Math.floor(Date.now()/864e5)%DT.length;function rd(){$("daily").innerHTML=`<b class="cy">${esc(DT[di][0])}:</b> ${esc(DT[di][1])}`}function rot(){di=(di+1)%DT.length;rd();$("daily").style.animation="none";$("daily").offsetHeight;$("daily").style.animation="pop .4s"}rd();ra();
 
-/* ===== Registrasi ===== */
+/* ===== Registrasi + Firebase Approval ===== */
 const SK=[["Editor","Video & Preset"],["Astronomy","Pengamatan & Teori"],["Programmer","Web & Automasi"],["Designer","Visual & UI"],["Content Creator","Edukasi & Media"],["Researcher","Riset & Data"]];
 const FS=[["Siapa namamu?","fullName","NAMA LENGKAP","text","Masukkan nama lengkapmu..."],["Username TikTok kamu","tiktok","USERNAME TIKTOK","text","@username"],["Berapa umurmu?","age","UMUR","number","Contoh: 17"],["Kamu dari mana?","city","KOTA / ASAL DAERAH","text","Contoh: Bandung"],["Kenapa mau gabung ISEA?","reason","ALASAN BERGABUNG","area","Ceritakan ketertarikanmu pada astronomi..."]];
-const V={};let st=0,photo="";
+const V={};let st=0,photo="",pollTimer=null;
+
 function drawStep(){const b=$("sbox");let h="";
 if(st<5){const f=FS[st];h=`<h3 class="sp text-xl font-bold mb-4">${f[0]}</h3><label class="block text-xs mu mb-2">${f[2]}</label>${f[3]==="area"?`<textarea id="fi" class="inp min-h-[120px]" maxlength="500" placeholder="${f[4]}"></textarea><p id="hint" class="text-xs mu mt-2">0 / min. 30 karakter</p>`:`<input id="fi" type="${f[3]}" class="inp" maxlength="40" placeholder="${f[4]}">`}`}
 else if(st===5)h=`<h3 class="sp text-xl font-bold mb-1">Skill apa yang kamu miliki?</h3><p class="text-xs mu mb-4">Pilih minimal satu.</p><div class="grid sm:grid-cols-2 gap-3">${SK.map(s=>`<label class="flex items-center justify-between gap-3 p-3 rounded-xl border border-white/15 bg-white/5 cursor-pointer hover:border-violet-400 transition"><span class="flex items-center gap-3"><input type="checkbox" class="sk w-4 h-4" value="${s[0]}" ${(V.skills||[]).includes(s[0])?"checked":""}><span class="text-sm font-medium">${s[0]}</span></span><span class="text-[11px] mu">${s[1]}</span></label>`).join("")}</div>`;
@@ -281,6 +309,7 @@ b.innerHTML=`<div class="step">${h}</div>`;
 const fi=$("fi");if(fi){fi.value=V[FS[st][1]]||"";fi.focus({preventScroll:true});if(st===4){const u=()=>{const n=fi.value.trim().length;$("hint").textContent=n>=30?n+" karakter (memenuhi)":n+" / min. 30 karakter"};fi.oninput=u;u()}}
 const ph=$("ph");if(ph)ph.onchange=()=>{const f=ph.files[0];if(!f)return;if(f.size>5242880){err("Ukuran foto maksimal 5 MB.");ph.value="";return}photo&&URL.revokeObjectURL(photo);photo=URL.createObjectURL(f);$("pp").src=photo;$("pp").classList.remove("hidden")};
 $("sl").textContent=`LANGKAH ${st+1} DARI 8`;const p=(st+1)/8*100;$("sp").textContent=p+"%";$("pb").style.width=p+"%";$("bk").style.visibility=st?"visible":"hidden";$("nx").textContent=st===7?"BUAT KARTU →":"LANJUT →";err("")}
+
 function err(m){$("err").textContent=m?"Perhatian: "+m:"";$("err").classList.toggle("hidden",!m)}
 const MASH=/(asdf|sdfg|dfgh|fghj|ghjk|hjkl|qwer|wert|erty|rtyu|tyui|yuio|uiop|zxcv|xcvb|cvbn|vbnm)/;
 const bad=w=>{const t=w.toLowerCase().replace(/[^a-z]/g,"");return t.length>=2&&(/(.)\1{3,}/.test(t)||/[bcdfghjklmnpqrstvwxyz]{6,}/.test(t)||MASH.test(t)||(t.length>=4&&!/[aeiou]/.test(t)))};
@@ -292,19 +321,194 @@ if(st===2){const n=+v;if(!v||!Number.isInteger(n)||n<10||n>70)return err("Umur h
 if(st===4){const w=v.split(" ").filter(Boolean);if(v.length<30||w.length<5)return err(`Alasan terlalu singkat (${v.length}/30 karakter, ${w.length}/5 kata).`),0;if(new Set(w.map(x=>x.toLowerCase())).size<4||w.filter(bad).length>1)return err("Alasan terlihat asal-asalan. Tulis kalimat yang jelas."),0}
 if(st===5){const s=[...document.querySelectorAll(".sk:checked")].map(x=>x.value);if(!s.length)return err("Pilih minimal satu skill."),0;V.skills=s}
 if(k)V[k]=v;return 1}
+
 $("nx").onclick=()=>{if(!validate())return;if(st===7)return mk();st++;drawStep()};
 $("bk").onclick=()=>{if(st>0){if(st===5)V.skills=[...document.querySelectorAll(".sk:checked")].map(x=>x.value);st--;drawStep()}};
 function waLinks(){$("wa").innerHTML=WA_GROUPS.filter(g=>g.url).map(g=>`<a href="${esc(g.url)}" target="_blank" rel="noopener noreferrer" class="btn bg">${esc(g.name)} ↗</a>`).join("")||'<span class="text-xs mu">Link grup belum diatur.</span>'}
-function fill(m){$("cn").textContent=m.name;$("cu").textContent=m.tiktok;$("cc").textContent=m.city;$("cs").textContent="Skills: "+m.skills.join(", ");const has=!!photo;$("cph").classList.toggle("hidden",!has);$("cav").classList.toggle("hidden",has);if(has)$("cph").src=photo;waLinks();$("fw").classList.add("hidden");$("mr").classList.remove("hidden");$("mr").firstElementChild.scrollIntoView({behavior:"smooth",block:"center"})}
-function mk(){const m={name:V.fullName,tiktok:V.tiktok,city:V.city,skills:V.skills};try{localStorage.setItem("isea_member_v2",JSON.stringify(m))}catch(e){}fill(m);confetti();toast("Kartu anggota ISEA berhasil dibuat.")}
-function again(){for(const k in V)delete V[k];photo&&URL.revokeObjectURL(photo);photo="";st=0;$("mr").classList.add("hidden");$("fw").classList.remove("hidden");drawStep();try{localStorage.removeItem("isea_member_v2")}catch(e){}}
-function dl(){const c=document.createElement("canvas");c.width=960;c.height=580;const x=c.getContext("2d"),g=x.createLinearGradient(0,0,960,580);g.addColorStop(0,"#1d2c54");g.addColorStop(.55,"#28114f");g.addColorStop(1,"#0a0f20");x.fillStyle=g;x.fillRect(0,0,960,580);x.strokeStyle="#b191ff";x.lineWidth=4;x.strokeRect(18,18,924,544);
-x.fillStyle="#b191ff";x.font="bold 40px Arial";x.fillText("ISEA",55,80);x.fillStyle="#94a3b8";x.font="15px Arial";x.fillText("INDONESIA SPACE & EDUCATION ASSOCIATION",55,108);x.fillStyle="#fff";x.font="bold 20px Arial";x.fillText("OFFICIAL MEMBER",715,78);x.font="bold 44px Arial";let n=$("cn").textContent;if(n.length>22)n=n.slice(0,22)+"...";x.fillText(n,55,275);
-x.fillStyle="#cbd5e1";x.font="28px Arial";x.fillText($("cu").textContent,55,330);x.fillText($("cc").textContent,55,378);x.fillStyle="#38bdf8";x.font="21px Arial";let s=$("cs").textContent;if(s.length>56)s=s.slice(0,56)+"...";x.fillText(s,55,435);x.fillStyle="#b191ff";x.font="bold 17px Arial";x.fillText("REGISTERED BY ISEA SYSTEM",55,520);x.fillStyle="#94a3b8";x.fillText("by KovTheGreat",775,520);
-const im=$("cph");if(!im.classList.contains("hidden")&&im.naturalWidth){const z=Math.min(im.naturalWidth,im.naturalHeight);x.save();x.beginPath();x.arc(800,305,82,0,6.3);x.clip();x.drawImage(im,(im.naturalWidth-z)/2,(im.naturalHeight-z)/2,z,z,718,223,164,164);x.restore()}
-const a=document.createElement("a");a.download="ISEA-Member-Card.png";a.href=c.toDataURL("image/png");a.click();toast("Kartu tersimpan.")}
+
+function renderCardCanvas(){
+  const c=document.createElement("canvas");c.width=960;c.height=580;
+  const x=c.getContext("2d"),g=x.createLinearGradient(0,0,960,580);
+  g.addColorStop(0,"#1d2c54");g.addColorStop(.55,"#28114f");g.addColorStop(1,"#0a0f20");
+  x.fillStyle=g;x.fillRect(0,0,960,580);x.strokeStyle="#b191ff";x.lineWidth=4;x.strokeRect(18,18,924,544);
+  x.fillStyle="#b191ff";x.font="bold 40px Arial";x.fillText("ISEA",55,80);
+  x.fillStyle="#94a3b8";x.font="15px Arial";x.fillText("INDONESIA SPACE & EDUCATION ASSOCIATION",55,108);
+  x.fillStyle="#fff";x.font="bold 20px Arial";x.fillText("OFFICIAL MEMBER",715,78);
+  x.font="bold 44px Arial";let n=$("cn").textContent;if(n.length>22)n=n.slice(0,22)+"...";x.fillText(n,55,275);
+  x.fillStyle="#cbd5e1";x.font="28px Arial";x.fillText($("cu").textContent,55,330);
+  x.fillText($("cc").textContent,55,378);
+  x.fillStyle="#38bdf8";x.font="21px Arial";let s=$("cs").textContent;if(s.length>56)s=s.slice(0,56)+"...";x.fillText(s,55,435);
+  x.fillStyle="#b191ff";x.font="bold 17px Arial";x.fillText("REGISTERED BY ISEA SYSTEM",55,520);
+  x.fillStyle="#94a3b8";x.font="bold 17px Arial";x.fillText("by KovTheGreat",775,520);
+  const im=$("cph");
+  if(!im.classList.contains("hidden")&&im.naturalWidth){
+    const z=Math.min(im.naturalWidth,im.naturalHeight);
+    x.save();x.beginPath();x.arc(800,305,82,0,6.3);x.clip();
+    x.drawImage(im,(im.naturalWidth-z)/2,(im.naturalHeight-z)/2,z,z,718,223,164,164);x.restore();
+  }
+  return c;
+}
+
+function applyApprovalState(status){
+  const badge=$("stBadge"),waBox=$("waBox"),note=$("pendNote");
+  if(status==="APPROVED"){
+    clearInterval(pollTimer);
+    badge.textContent="DISETUJUI PEMBUAT — LINK WA TERBUKA";
+    badge.className="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 mb-4";
+    waBox.classList.remove("hidden");
+    note.classList.add("hidden");
+    waLinks();
+    confetti();
+    toast("Pendaftaran disetujui! Link grup WA sudah terbuka.");
+  }else if(status==="REJECTED"){
+    clearInterval(pollTimer);
+    badge.textContent="DITOLAK PEMBUAT";
+    badge.className="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-400/40 mb-4";
+    waBox.classList.add("hidden");
+    toast("Pendaftaranmu ditolak oleh pembuat.");
+    setTimeout(()=>again(),1200);
+  }else{
+    badge.textContent="MENUNGGU PERSETUJUAN PEMBUAT";
+    badge.className="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-400/40 mb-4";
+    waBox.classList.add("hidden");
+    note.classList.remove("hidden");
+  }
+}
+
+async function watchRegistration(id){
+  if(!id)return;
+  const check=async()=>{
+    try{
+      const r=await fetch(`${DB_URL}/registrations/${encodeURIComponent(id)}.json`);
+      const d=await r.json();
+      if(!d){clearInterval(pollTimer);again();return}
+      applyApprovalState(d.status||"PENDING");
+    }catch(e){}
+  };
+  await check();
+  clearInterval(pollTimer);
+  pollTimer=setInterval(check,3000);
+}
+
+function fill(m){
+  $("cn").textContent=m.name;$("cu").textContent=m.tiktok;$("cc").textContent=m.city;$("cs").textContent="Skills: "+m.skills.join(", ");
+  const has=!!photo;$("cph").classList.toggle("hidden",!has);$("cav").classList.toggle("hidden",has);if(has)$("cph").src=photo;
+  applyApprovalState(m.status||"PENDING");
+  $("fw").classList.add("hidden");$("mr").classList.remove("hidden");$("mr").firstElementChild.scrollIntoView({behavior:"smooth",block:"center"});
+}
+
+async function mk(){
+  const id="ISEA-"+Date.now().toString(36).toUpperCase();
+  const m={
+    id,
+    name:V.fullName,
+    tiktok:V.tiktok,
+    age:V.age||"",
+    city:V.city,
+    reason:V.reason||"",
+    skills:V.skills,
+    status:"PENDING",
+    createdAt:Date.now()
+  };
+  fill(m);
+  try{localStorage.setItem("isea_member_v2",JSON.stringify({id}))}catch(e){}
+
+  toast("Mengirim kartu ke pembuat...");
+  try{
+    const cardSmall=document.createElement("canvas");
+    cardSmall.width=640;cardSmall.height=386;
+    cardSmall.getContext("2d").drawImage(renderCardCanvas(),0,0,640,386);
+    const cardData=cardSmall.toDataURL("image/jpeg",0.65);
+
+    await fetch(`${DB_URL}/registrations/${encodeURIComponent(id)}.json`,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({...m,cardData})
+    });
+    toast("Kartu terkirim. Menunggu persetujuan pembuat.");
+  }catch(e){
+    toast("Gagal kirim ke Firebase. Cek koneksi/rules.");
+  }
+  watchRegistration(id);
+}
+
+function again(){
+  clearInterval(pollTimer);
+  for(const k in V)delete V[k];
+  photo&&URL.revokeObjectURL(photo);photo="";st=0;
+  $("mr").classList.add("hidden");$("fw").classList.remove("hidden");drawStep();
+  try{localStorage.removeItem("isea_member_v2")}catch(e){}
+}
+
+function dl(){
+  const c=renderCardCanvas();
+  const a=document.createElement("a");a.download="ISEA-Member-Card.png";a.href=c.toDataURL("image/png");a.click();
+  toast("Kartu tersimpan.");
+}
+
+/* ===== Admin Panel Pembuat ===== */
+function toggleAdminPanel(){$("adminPanel").classList.toggle("hidden")}
+async function loadApplicants(){
+  if($("adminPin").value!==ADMIN_PIN)return toast("PIN pembuat salah.");
+  $("adminList").innerHTML='<p class="mu">Memuat data pendaftar...</p>';
+  try{
+    const r=await fetch(`${DB_URL}/registrations.json`);
+    const raw=await r.json();
+    if(!raw)return $("adminList").innerHTML='<p class="mu">Belum ada pendaftar.</p>';
+    const list=Object.values(raw).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+    $("adminList").innerHTML=list.map(x=>`
+      <div class="p-4 rounded-2xl bg-[#040712] border border-white/15 space-y-3">
+        <div class="flex flex-wrap justify-between gap-2">
+          <div>
+            <b class="sp text-sm">${esc(x.name)}</b> <span class="cy">${esc(x.tiktok)}</span>
+            <div class="mu mt-0.5">${esc(x.city)} • Umur ${esc(x.age||"-")} • Skills: ${esc((x.skills||[]).join(", "))}</div>
+          </div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-bold h-fit ${x.status==="APPROVED"?"bg-emerald-500/20 text-emerald-300":x.status==="REJECTED"?"bg-rose-500/20 text-rose-300":"bg-amber-500/20 text-amber-300"}">${esc(x.status||"PENDING")}</span>
+        </div>
+        ${x.reason?`<p class="text-slate-300 text-xs bg-white/5 p-2.5 rounded-xl">"${esc(x.reason)}"</p>`:""}
+        ${x.cardData?`<img src="${x.cardData}" alt="Kartu ${esc(x.name)}" class="w-full max-w-[340px] rounded-xl border border-white/15">`:""}
+        <div class="flex gap-2">
+          <button class="btn bg !py-2 !px-3" onclick="setDecision('${esc(x.id)}','APPROVED')">Terima</button>
+          <button class="btn br !py-2 !px-3" onclick="setDecision('${esc(x.id)}','REJECTED')">Tolak</button>
+        </div>
+      </div>
+    `).join("");
+  }catch(e){
+    $("adminList").innerHTML='<p class="text-rose-400">Gagal memuat data dari Firebase.</p>';
+  }
+}
+
+async function setDecision(id,status){
+  if($("adminPin").value!==ADMIN_PIN)return toast("PIN pembuat salah.");
+  try{
+    await fetch(`${DB_URL}/registrations/${encodeURIComponent(id)}/status.json`,{
+      method:"PUT",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(status)
+    });
+    toast(status==="APPROVED"?"Pendaftar diterima.":"Pendaftar ditolak.");
+    loadApplicants();
+  }catch(e){
+    toast("Gagal mengubah status.");
+  }
+}
+
 drawStep();
-try{const m=JSON.parse(localStorage.getItem("isea_member_v2")||"null");if(m)fill(m)}catch(e){}
+try{
+  const saved=JSON.parse(localStorage.getItem("isea_member_v2")||"null");
+  if(saved&&saved.id){
+    fetch(`${DB_URL}/registrations/${encodeURIComponent(saved.id)}.json`)
+      .then(r=>r.json())
+      .then(d=>{
+        if(d&&d.status!=="REJECTED"){
+          fill(d);
+          watchRegistration(d.id);
+        }else{
+          localStorage.removeItem("isea_member_v2");
+        }
+      }).catch(()=>{});
+  }
+}catch(e){}
 
 /* ===== Quiz (format: soal|A|B|C|D|indeks benar) ===== */
 const Q=`Planet apakah yang dikenal sebagai Planet Merah?|Venus|Mars|Jupiter|Merkurius|1
